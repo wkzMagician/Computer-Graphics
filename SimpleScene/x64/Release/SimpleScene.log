@@ -1,0 +1,16 @@
+﻿  main.cpp
+D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\include\mesh.h(107,50): warning C4267: “参数”: 从“size_t”转换到“GLsizei”，可能丢失数据
+  (编译源文件“main.cpp”)
+  
+D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\include\data.h(15,37): warning C4244: “初始化”: 从“double”转换到“unsigned int”，可能丢失数据
+  (编译源文件“main.cpp”)
+  
+D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\include\data.h(16,37): warning C4244: “初始化”: 从“double”转换到“unsigned int”，可能丢失数据
+  (编译源文件“main.cpp”)
+  
+  正在生成代码
+  2 of 1699 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    8 functions had inline decision re-evaluated but remain unchanged
+  已完成代码的生成
+  SimpleScene.vcxproj -> D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\x64\Release\SimpleScene.exe
