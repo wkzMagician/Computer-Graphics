@@ -15,14 +15,14 @@ const unsigned int SCR_HEIGHT = 800 * 1.6;
 // 房间大小
 float roomWidth = 1.0f;
 float roomHeight = 0.6f;
-float roomDepth = 1.6f;
+float roomDepth = 1.0f;
 
 // 全局坐标
 glm::vec3 cubePos(0.0f, 0.0f, 0.0f);
 
 // 摄像机设置
 //Camera camera(glm::vec3(0.0f, 0.05f, 1.0f));
-Camera camera(glm::vec3(0.0f, 0.0f, roomDepth / 1.5f));
+Camera camera(glm::vec3(0.0f, 0.0f, roomDepth));
 //Camera camera(glm::vec3(0.0f, 0.1f, 0.5f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -30,13 +30,14 @@ float lastY = SCR_HEIGHT / 2.0f;
 // 光照设置
 
 // 光照颜色
-glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+//glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+glm::vec3 lightColor(0.02f, 0.02f, 0.02f);
 
 glm::vec3 lightAmbient = 0.2f * lightColor;
 glm::vec3 lightDiffuse = 0.8f * lightColor;
 glm::vec3 lightSpecular = 1.0f * lightColor;
 
-Light light(lightAmbient, lightDiffuse, lightSpecular);
+//Light light(lightAmbient, lightDiffuse, lightSpecular);
 
 // 面光源
 // 长宽高
@@ -47,7 +48,7 @@ float areaLightDepth = 0.2f;
 glm::vec3 areaLightPos(0.0f, roomHeight - areaLightHeight, 0.0f);
 
 // 采样点数
-int sampleNum = 500;
+int sampleNum = 100;
 // 采样点数组
 std::vector<glm::vec3> samplePoints;
 
@@ -60,69 +61,83 @@ glm::vec3 FloorColor(0.5f, 0.5f, 0.5f);
 glm::vec3 lightCubeColor(1.0f, 1.0f, 1.0f);
 
 // 镜面分量
-glm::vec3 FWallSpecular(0.25f, 0.25f, 0.25f);
+//glm::vec3 FWallSpecular(0.25f, 0.25f, 0.25f);
+//
+//float FWallShininess = 8.0f;
+//
+//// 颜色-》材质
+//MyMaterial FWallMaterial(FWallColor, FWallColor, FWallSpecular, FWallShininess);
+//MyMaterial LWallMaterial(LWallColor, LWallColor, FWallSpecular, FWallShininess);
+//MyMaterial RWallMaterial(RWallColor, RWallColor, FWallSpecular, FWallShininess);
+//MyMaterial CeilingMaterial(CeilingColor, CeilingColor, FWallSpecular, FWallShininess);
+//MyMaterial FloorMaterial(FloorColor, FloorColor, FWallSpecular, FWallShininess);
+//MyMaterial lightCubeMaterial(lightCubeColor, lightCubeColor, FWallSpecular, FWallShininess);
 
-float FWallShininess = 8.0f;
+// BRDF材质
+// 金属度：影响高光部分
+float FWallMetallic = 0.2f;
+// 粗糙度
+float FWallRoughness = 0.75f;
+// 环境光遮蔽
+float FWallAmbientOcclusion = 0.5f;
 
-// 颜色-》材质
-MyMaterial FWallMaterial(FWallColor, FWallColor, FWallSpecular, FWallShininess);
-MyMaterial LWallMaterial(LWallColor, LWallColor, FWallSpecular, FWallShininess);
-MyMaterial RWallMaterial(RWallColor, RWallColor, FWallSpecular, FWallShininess);
-MyMaterial CeilingMaterial(CeilingColor, CeilingColor, FWallSpecular, FWallShininess);
-MyMaterial FloorMaterial(FloorColor, FloorColor, FWallSpecular, FWallShininess);
-MyMaterial lightCubeMaterial(lightCubeColor, lightCubeColor, FWallSpecular, FWallShininess);
+Material_BRDF FWallMaterial(FWallColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
+Material_BRDF LWallMaterial(LWallColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
+Material_BRDF RWallMaterial(RWallColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
+Material_BRDF CeilingMaterial(CeilingColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
+Material_BRDF FloorMaterial(FloorColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
 
 
 // 统一设置用到的坐标信息(每一行前三个数字为点的坐标，后三个为法向量)
    // ------------------------------------------------------------------
 float vertices[] = {
     // 后面
-    -roomWidth, -roomHeight, -roomDepth,  0.0f,  0.0f, -1.0f,
-     roomWidth, -roomHeight, -roomDepth,  0.0f,  0.0f, -1.0f,
-     roomWidth,  roomHeight, -roomDepth,  0.0f,  0.0f, -1.0f,
-     roomWidth,  roomHeight, -roomDepth,  0.0f,  0.0f, -1.0f,
-    -roomWidth,  roomHeight, -roomDepth,  0.0f,  0.0f, -1.0f,
-    -roomWidth, -roomHeight, -roomDepth,  0.0f,  0.0f, -1.0f,
+    -roomWidth, -roomHeight, -roomDepth,  0.0f,  0.0f, 1.0f,
+     roomWidth, -roomHeight, -roomDepth,  0.0f,  0.0f, 1.0f,
+     roomWidth,  roomHeight, -roomDepth,  0.0f,  0.0f, 1.0f,
+     roomWidth,  roomHeight, -roomDepth,  0.0f,  0.0f, 1.0f,
+    -roomWidth,  roomHeight, -roomDepth,  0.0f,  0.0f, 1.0f,
+    -roomWidth, -roomHeight, -roomDepth,  0.0f,  0.0f, 1.0f,
 
     // 前面
-    -roomWidth, -roomHeight,  roomDepth,  0.0f,  0.0f,  1.0f,
-     roomWidth, -roomHeight,  roomDepth,  0.0f,  0.0f,  1.0f,
-     roomWidth,  roomHeight,  roomDepth,  0.0f,  0.0f,  1.0f,
-     roomWidth,  roomHeight,  roomDepth,  0.0f,  0.0f,  1.0f,
-    -roomWidth,  roomHeight,  roomDepth,  0.0f,  0.0f,  1.0f,
-    -roomWidth, -roomHeight,  roomDepth,  0.0f,  0.0f,  1.0f,
+    -roomWidth, -roomHeight,  roomDepth,  0.0f,  0.0f,  -1.0f,
+     roomWidth, -roomHeight,  roomDepth,  0.0f,  0.0f,  -1.0f,
+     roomWidth,  roomHeight,  roomDepth,  0.0f,  0.0f,  -1.0f,
+     roomWidth,  roomHeight,  roomDepth,  0.0f,  0.0f,  -1.0f,
+    -roomWidth,  roomHeight,  roomDepth,  0.0f,  0.0f,  -1.0f,
+    -roomWidth, -roomHeight,  roomDepth,  0.0f,  0.0f,  -1.0f,
 
     // 左面
-    -roomWidth,  roomHeight,  roomDepth, -1.0f,  0.0f,  0.0f,
-    -roomWidth,  roomHeight, -roomDepth, -1.0f,  0.0f,  0.0f,
-    -roomWidth, -roomHeight, -roomDepth, -1.0f,  0.0f,  0.0f,
-    -roomWidth, -roomHeight, -roomDepth, -1.0f,  0.0f,  0.0f,
-    -roomWidth, -roomHeight,  roomDepth, -1.0f,  0.0f,  0.0f,
-    -roomWidth,  roomHeight,  roomDepth, -1.0f,  0.0f,  0.0f,
+    -roomWidth,  roomHeight,  roomDepth, 1.0f,  0.0f,  0.0f,
+    -roomWidth,  roomHeight, -roomDepth, 1.0f,  0.0f,  0.0f,
+    -roomWidth, -roomHeight, -roomDepth, 1.0f,  0.0f,  0.0f,
+    -roomWidth, -roomHeight, -roomDepth, 1.0f,  0.0f,  0.0f,
+    -roomWidth, -roomHeight,  roomDepth, 1.0f,  0.0f,  0.0f,
+    -roomWidth,  roomHeight,  roomDepth, 1.0f,  0.0f,  0.0f,
 
     // 右面
-     roomWidth,  roomHeight,  roomDepth,  1.0f,  0.0f,  0.0f,
-     roomWidth,  roomHeight, -roomDepth,  1.0f,  0.0f,  0.0f,
-     roomWidth, -roomHeight, -roomDepth,  1.0f,  0.0f,  0.0f,
-     roomWidth, -roomHeight, -roomDepth,  1.0f,  0.0f,  0.0f,
-     roomWidth, -roomHeight,  roomDepth,  1.0f,  0.0f,  0.0f,
-     roomWidth,  roomHeight,  roomDepth,  1.0f,  0.0f,  0.0f,
+     roomWidth,  roomHeight,  roomDepth,  -1.0f,  0.0f,  0.0f,
+     roomWidth,  roomHeight, -roomDepth,  -1.0f,  0.0f,  0.0f,
+     roomWidth, -roomHeight, -roomDepth,  -1.0f,  0.0f,  0.0f,
+     roomWidth, -roomHeight, -roomDepth,  -1.0f,  0.0f,  0.0f,
+     roomWidth, -roomHeight,  roomDepth,  -1.0f,  0.0f,  0.0f,
+     roomWidth,  roomHeight,  roomDepth,  -1.0f,  0.0f,  0.0f,
 
      // 底面
-     -roomWidth, -roomHeight, -roomDepth,  0.0f, -1.0f,  0.0f,
-      roomWidth, -roomHeight, -roomDepth,  0.0f, -1.0f,  0.0f,
-      roomWidth, -roomHeight,  roomDepth,  0.0f, -1.0f,  0.0f,
-      roomWidth, -roomHeight,  roomDepth,  0.0f, -1.0f,  0.0f,
-     -roomWidth, -roomHeight,  roomDepth,  0.0f, -1.0f,  0.0f,
-     -roomWidth, -roomHeight, -roomDepth,  0.0f, -1.0f,  0.0f,
+     -roomWidth, -roomHeight, -roomDepth,  0.0f, 1.0f,  0.0f,
+      roomWidth, -roomHeight, -roomDepth,  0.0f, 1.0f,  0.0f,
+      roomWidth, -roomHeight,  roomDepth,  0.0f, 1.0f,  0.0f,
+      roomWidth, -roomHeight,  roomDepth,  0.0f, 1.0f,  0.0f,
+     -roomWidth, -roomHeight,  roomDepth,  0.0f, 1.0f,  0.0f,
+     -roomWidth, -roomHeight, -roomDepth,  0.0f, 1.0f,  0.0f,
 
      // 顶面
-     -roomWidth,  roomHeight, -roomDepth,  0.0f,  1.0f,  0.0f,
-      roomWidth,  roomHeight, -roomDepth,  0.0f,  1.0f,  0.0f,
-      roomWidth,  roomHeight,  roomDepth,  0.0f,  1.0f,  0.0f,
-      roomWidth,  roomHeight,  roomDepth,  0.0f,  1.0f,  0.0f,
-     -roomWidth,  roomHeight,  roomDepth,  0.0f,  1.0f,  0.0f,
-     -roomWidth,  roomHeight, -roomDepth,  0.0f,  1.0f,  0.0f
+     -roomWidth,  roomHeight, -roomDepth,  0.0f,  -1.0f,  0.0f,
+      roomWidth,  roomHeight, -roomDepth,  0.0f,  -1.0f,  0.0f,
+      roomWidth,  roomHeight,  roomDepth,  0.0f,  -1.0f,  0.0f,
+      roomWidth,  roomHeight,  roomDepth,  0.0f,  -1.0f,  0.0f,
+     -roomWidth,  roomHeight,  roomDepth,  0.0f,  -1.0f,  0.0f,
+     -roomWidth,  roomHeight, -roomDepth,  0.0f,  -1.0f,  0.0f
 };
 
 float areaLightVertices[] = {

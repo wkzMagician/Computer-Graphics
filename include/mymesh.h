@@ -26,6 +26,8 @@ class MyMesh
 	// 材质
 	MyMaterial material;
 
+	Material_BRDF materialBRDF;
+
 	// Texture Path
 	vector<string> texturePaths;
 
@@ -61,6 +63,15 @@ public:
 		this->vertices = new float[N];
 		memcpy(this->vertices, vertices, N * sizeof(float));
 		this->material = material;
+
+		setupMesh();
+	}
+
+	MyMesh(float* vertices, unsigned int N, Material_BRDF material) {
+		verticesSize = N;
+		this->vertices = new float[N];
+		memcpy(this->vertices, vertices, N * sizeof(float));
+		this->materialBRDF = material;
 
 		setupMesh();
 	}
@@ -163,7 +174,6 @@ public:
 
 			return;
 		}
-
         
 		// 设置顶点属性指针
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(0 * sizeof(float)));
@@ -201,10 +211,16 @@ public:
 		shader->setVec3("objectColor", color);
 
 		// ！！！设置材质
-		shader->setVec3("material.ambient", material.ambient);
+		/*shader->setVec3("material.ambient", material.ambient);
 		shader->setVec3("material.diffuse", material.diffuse);
 		shader->setVec3("material.specular", material.specular);
-		shader->setFloat("material.shininess", material.shininess);
+		shader->setFloat("material.shininess", material.shininess);*/
+
+		// 设置 BRDF 材质
+		shader->setVec3("material.albedo", materialBRDF.albedo);
+		shader->setFloat("material.ao", materialBRDF.ao);
+		shader->setFloat("material.metallic", materialBRDF.metallic);
+		shader->setFloat("material.roughness", materialBRDF.roughness);
 
 		/*if (useTexture) {
 			shader->setBool("useTex", true);

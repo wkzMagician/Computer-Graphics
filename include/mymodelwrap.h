@@ -39,9 +39,9 @@ public:
         // 设置光照参数
 		shader->setVec3("lightColor", lightColor);
 		// 更复杂的光照设置
-		shader->setVec3("light.ambient", light.ambient);
+		/*shader->setVec3("light.ambient", light.ambient);
 		shader->setVec3("light.diffuse", light.diffuse);
-		shader->setVec3("light.specular", light.specular);
+		shader->setVec3("light.specular", light.specular);*/
 
         shader->setVec3("viewPos", camera.Position);
 

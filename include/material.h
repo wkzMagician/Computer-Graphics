@@ -62,3 +62,32 @@ public:
 	}
 };
     
+// 用于 Cook-Torrance BRDF 的参数
+class Material_BRDF {
+public:
+	glm::vec3 albedo; //基础颜色
+	float metallic; //金属度
+	float roughness; //粗糙度
+	float ao; //环境光遮蔽
+
+	Material_BRDF(glm::vec3 albedo, float metallic, float roughness, float ao) {
+		this->albedo = albedo;
+		this->metallic = metallic;
+		this->roughness = roughness;
+		this->ao = ao;
+	}
+
+	Material_BRDF() {
+		this->albedo = glm::vec3(0.0f);
+		this->metallic = 0.0f;
+		this->roughness = 0.0f;
+		this->ao = 0.0f;
+	}
+
+	Material_BRDF(const Material_BRDF& material) {
+		this->albedo = material.albedo;
+		this->metallic = material.metallic;
+		this->roughness = material.roughness;
+		this->ao = material.ao;
+	}
+};
