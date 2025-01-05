@@ -193,18 +193,6 @@ public:
 
 		shader->setVec3("objectColor", color);
 
-		if (drawTerrain) {
-			shader->setFloat("gMinHeight", terrainMinHeight);
-			shader->setFloat("gMaxHeight", terrainMaxHeight);
-
-			// Texture
-			for (unsigned int i = 0; i < textures.size(); i++) {
-				glActiveTexture(GL_TEXTURE0 + i);
-				shader->setInt((textures[i].type + std::to_string(i)).c_str(), i);
-				glBindTexture(GL_TEXTURE_2D, textures[i].id);
-			}
-		}
-
 		/*if (useTexture) {
 			shader->setBool("useTex", true);
 		}

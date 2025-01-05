@@ -15,65 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\camera.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\data.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\geometry.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mesh.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\modelwrap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mymodel.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mymodelwrap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\terrain.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\abstract_modelwrap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mymesh.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\particle.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\rigidbody.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\particle_emitter.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\physics_system.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="include\shape.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="lightcube.fs">
       <Filter>源文件</Filter>
     </None>
@@ -95,8 +36,37 @@
     <ClCompile Include="..\..\..\..\OpenGL\src\glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="include\terrain.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\abstract_modelwrap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mymesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mymodel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mymodelwrap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -49,17 +49,7 @@ public:
 		// Shader Color
 		shader->setFloat("mixRatio", mixRatio);
 
-		shader->setBool("use2Light", isTreeLit);
-		if (isTreeLit) {
-			shader->setVec3("pointLight.position", lightPos2);
-			shader->setVec3("pointLight.lightColor", lightColor2);
-			shader->setFloat("pointLight.constant", constant);
-			shader->setFloat("pointLight.linear", linear);
-			shader->setFloat("pointLight.quadratic", quadratic);
-		}
-
 		// 渲染
-
 		model->draw(shader);
     }
 
