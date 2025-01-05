@@ -23,6 +23,9 @@ class MyMesh
     // color
 	glm::vec3 color;
 
+	// 材质
+	MyMaterial material;
+
 	// Texture Path
 	vector<string> texturePaths;
 
@@ -32,22 +35,17 @@ class MyMesh
 	const glm::vec3 lineColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	bool drawEdge = false;
-	bool drawTerrain = false;
 
 public:
 	void setDrawEdge(bool drawEdge) {
 		this->drawEdge = drawEdge;
 	}
 
-	void setDrawTerrain(bool drawTerrain) {
-		this->drawTerrain = drawTerrain;
-	}
-
-
 	// Texture
 	vector<Texture> textures;
 
 	unsigned int vertexAttrSize = 6;
+
 
 	MyMesh(float* vertices, unsigned int N, glm::vec3 color) {
 		verticesSize = N;
@@ -57,6 +55,15 @@ public:
 
 		setupMesh();
     }
+
+	MyMesh(float* vertices, unsigned int N, MyMaterial material) {
+		verticesSize = N;
+		this->vertices = new float[N];
+		memcpy(this->vertices, vertices, N * sizeof(float));
+		this->material = material;
+
+		setupMesh();
+	}
 
 	MyMesh(float* vertices, unsigned int N, glm::vec3 color, vector<string> texturePaths, bool useTexture) {
 		verticesSize = N;
@@ -192,6 +199,12 @@ public:
 		}
 
 		shader->setVec3("objectColor", color);
+
+		// ！！！设置材质
+		shader->setVec3("material.ambient", material.ambient);
+		shader->setVec3("material.diffuse", material.diffuse);
+		shader->setVec3("material.specular", material.specular);
+		shader->setFloat("material.shininess", material.shininess);
 
 		/*if (useTexture) {
 			shader->setBool("useTex", true);

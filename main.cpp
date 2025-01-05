@@ -63,16 +63,22 @@ int main()
 	initData();
 
     // 编译shader操作
-    Shader lightingShader("resources/shader/lighting.vs", "resources/shader/lighting.fs");
+    Shader lightingShader("resources/shader/arealighting.vs", "resources/shader/arealighting.fs");
     Shader lightCubeShader("resources/shader/lightcube.vs", "resources/shader/lightcube.fs");
 
-	MyMesh FWall(FWallVertices, FWallVerticesSize, FWallColor);
+	/*MyMesh FWall(FWallVertices, FWallVerticesSize, FWallColor);
 	MyMesh LWall(LWallVertices, LWallVerticesSize, LWallColor);
 	MyMesh RWall(RWallVertices, RWallVerticesSize, RWallColor);
 	MyMesh Ceiling(CeilingVertices, CeilingVerticesSize, CeilingColor);
-	MyMesh Floor(FloorVertices, FloorVerticesSize, FloorColor);
+	MyMesh Floor(FloorVertices, FloorVerticesSize, FloorColor);*/
+
+	MyMesh FWall(FWallVertices, FWallVerticesSize, FWallMaterial);
+	MyMesh LWall(LWallVertices, LWallVerticesSize, LWallMaterial);
+	MyMesh RWall(RWallVertices, RWallVerticesSize, RWallMaterial);
+	MyMesh Ceiling(CeilingVertices, CeilingVerticesSize, CeilingMaterial);
+	MyMesh Floor(FloorVertices, FloorVerticesSize, FloorMaterial);
 	
-	MyMesh lightCube(vertices, lightCubeVerticesSize, lightCubeColor);
+	MyMesh lightCube(areaLightVertices, areaLightVerticesSize, lightCubeColor);
 
 	std::vector<MyMesh*> room = { &FWall, &LWall, &RWall, &Ceiling, &Floor};
 
@@ -80,7 +86,15 @@ int main()
 	MyModel lightCubeModel({ &lightCube });
 
 	MyModelWrap roomModelWrap(&roomModel, &lightingShader, roomGeometry);
-	MyModelWrap lightCubeModelWrap(&lightCubeModel, &lightCubeShader, lightCubeGeometry);
+    MyModelWrap lightCubeModelWrap(&lightCubeModel, &lightCubeShader, areaLightGeometry);
+
+	// 面光源
+	GLuint ssbo; // 绑定 Shader 存储缓冲对象
+    glGenBuffers(1, &ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, samplePoints.size() * sizeof(glm::vec3), samplePoints.data(), GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo); // 将 SSBO 绑定到绑定点 0
+
 
     // 渲染循环
     // -----------

@@ -31,23 +31,19 @@ public:
 
         shader->use();
 
-        // view/projection 变换
+        // 变换
         shader->setMat4("projection", projection);
         shader->setMat4("view", view);
-
-        // 设置光照参数
-		if (shader->getUniformLocation("lightColor") != -1)
-		    shader->setVec3("lightColor", lightColor);
-		if (shader->getUniformLocation("lightPos") != -1)
-		    shader->setVec3("lightPos", lightPos);
-		if (shader->getUniformLocation("viewPos") != -1)
-            shader->setVec3("viewPos", camera.Position);
-
-        // 世界坐标变换
 		shader->setMat4("model", geometry.getModelMatrix());
 
-		// Shader Color
-		shader->setFloat("mixRatio", mixRatio);
+        // 设置光照参数
+		shader->setVec3("lightColor", lightColor);
+		// 更复杂的光照设置
+		shader->setVec3("light.ambient", light.ambient);
+		shader->setVec3("light.diffuse", light.diffuse);
+		shader->setVec3("light.specular", light.specular);
+
+        shader->setVec3("viewPos", camera.Position);
 
 		// 渲染
 		model->draw(shader);
