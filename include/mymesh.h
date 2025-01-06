@@ -76,6 +76,15 @@ public:
 		setupMesh();
 	}
 
+	MyMesh(std::vector<float> vertices, Material_BRDF material) {
+		verticesSize = vertices.size();
+		this->vertices = new float[verticesSize];
+		memcpy(this->vertices, vertices.data(), verticesSize * sizeof(float));
+		this->materialBRDF = material;
+
+		setupMesh();
+	}
+
 	MyMesh(float* vertices, unsigned int N, glm::vec3 color, vector<string> texturePaths, bool useTexture) {
 		verticesSize = N;
 		this->vertices = new float[N];
