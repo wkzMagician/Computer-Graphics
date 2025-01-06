@@ -65,6 +65,8 @@ int main()
     // 编译shader操作
     Shader lightingShader("resources/shader/arealighting.vs", "resources/shader/arealighting.fs");
     Shader lightCubeShader("resources/shader/lightcube.vs", "resources/shader/lightcube.fs");
+    // 可视化法线Shader
+	Shader normalShader("resources/shader/normal.vs", "resources/shader/normal.fs", "resources/shader/normal.gs");
 
 	/*MyMesh FWall(FWallVertices, FWallVerticesSize, FWallColor);
 	MyMesh LWall(LWallVertices, LWallVerticesSize, LWallColor);
@@ -81,7 +83,7 @@ int main()
 	MyMesh lightCube(areaLightVertices, areaLightVerticesSize, lightCubeColor);
 
     // 管道模型
-	MyMesh bezierMesh(bezierVerticesData, FWallMaterial);
+	MyMesh bezierMesh(bezierVerticesData, pipeMaterial);
 
 	std::vector<MyMesh*> room = { &FWall, &LWall, &RWall, &Ceiling, &Floor};
 
@@ -92,6 +94,8 @@ int main()
 	MyModelWrap roomModelWrap(&roomModel, &lightingShader, roomGeometry);
     MyModelWrap lightCubeModelWrap(&lightCubeModel, &lightCubeShader, areaLightGeometry);
 	MyModelWrap bezierModelWrap(&bezierModel, &lightingShader, bezierGeometry);
+
+	MyModelWrap normalModelWrap(&bezierModel, &normalShader, bezierGeometry);
 
 	// 面光源
 	GLuint ssbo; // 绑定 Shader 存储缓冲对象
@@ -126,6 +130,7 @@ int main()
 		roomModelWrap.draw(camera);
 		lightCubeModelWrap.draw(camera);
 		bezierModelWrap.draw(camera);
+		//normalModelWrap.draw(camera);
    
         // glfw：交换缓冲区和轮询 IO 事件（按下/释放键、移动鼠标等）
         // -------------------------------------------------------------------------------

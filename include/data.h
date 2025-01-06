@@ -34,7 +34,8 @@ float lastY = SCR_HEIGHT / 2.0f;
 
 // 光照颜色
 //glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-glm::vec3 lightColor(0.02f, 0.02f, 0.02f);
+//glm::vec3 lightColor(0.02f, 0.02f, 0.02f);
+glm::vec3 lightColor(0.04f, 0.04f, 0.04f);
 
 glm::vec3 lightAmbient = 0.2f * lightColor;
 glm::vec3 lightDiffuse = 0.8f * lightColor;
@@ -76,6 +77,14 @@ Material_BRDF LWallMaterial(LWallColor, FWallMetallic, FWallRoughness, FWallAmbi
 Material_BRDF RWallMaterial(RWallColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
 Material_BRDF CeilingMaterial(CeilingColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
 Material_BRDF FloorMaterial(FloorColor, FWallMetallic, FWallRoughness, FWallAmbientOcclusion);
+
+// 金色的管道
+glm::vec3 pipeColor(0.8f, 0.6f, 0.2f);
+float pipeMetallic = 0.8f;
+float pipeRoughness = 0.3f;
+float pipeAmbientOcclusion = 1.0f;
+
+Material_BRDF pipeMaterial(pipeColor, pipeMetallic, pipeRoughness, pipeAmbientOcclusion);
 
 
 // 统一设置用到的坐标信息(每一行前三个数字为点的坐标，后三个为法向量)
@@ -204,7 +213,7 @@ Geometry bezierGeometry(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)
 
 // 贝塞尔曲线
 // 矩形 - 椭圆 - 圆形
-glm::vec2 rectSize(0.2f, 0.2f);
+glm::vec2 rectSize(0.4f, 0.4f);
 glm::vec2 ellipseRadius(0.2f, 0.1f);
 float circleRadius = 0.1f;
 
@@ -213,7 +222,7 @@ Ellipse ellipse(glm::vec3(1.0f, 0.0f, 0.0f), ellipseRadius);
 Circle circle(glm::vec3(1.0f, 0.0f, 0.0f), circleRadius);
 
 // 采样点数量
-int shapeSampleNum = 100;
+int shapeSampleNum = 120;
 // 采样得到的顶点
 std::vector<glm::vec3> rectSamplePoints;
 std::vector<glm::vec3> ellipseSamplePoints;
@@ -221,15 +230,22 @@ std::vector<glm::vec3> circleSamplePoints;
 
 // 控制顶点的坐标
 std::vector<glm::vec3> controlPoints = {
-	glm::vec3(-roomWidth / 2, roomHeight / 2, -roomDepth / 2),
-	glm::vec3(-roomWidth / 4, -roomHeight / 4, -roomDepth / 4),
-	glm::vec3(roomWidth / 4, roomHeight / 4, roomDepth / 4),
-	glm::vec3(roomWidth / 2, -roomHeight / 2, roomDepth / 2)
+	glm::vec3(-roomWidth / 2, roomHeight / 4, -roomDepth / 2),
+	glm::vec3(-roomWidth / 4, -roomHeight / 8, -roomDepth / 4),
+	glm::vec3(roomWidth / 4, roomHeight / 8, roomDepth / 4),
+	glm::vec3(roomWidth / 2, -roomHeight / 4, roomDepth / 2)
 };
+
+//std::vector<glm::vec3> controlPoints = {
+//    glm::vec3(-roomWidth / 2, 0.0f, -roomDepth / 2),
+//    glm::vec3(-roomWidth / 4, 0.0f, -roomDepth / 4),
+//    glm::vec3(roomWidth / 4, 0.0f, roomDepth / 4),
+//    glm::vec3(roomWidth / 2, 0.0f, roomDepth / 2)
+//};
 
 // 贝塞尔曲线
 BezierCurve bezierCurve(controlPoints);
-int bezierSampleNum = 100;
+int bezierSampleNum = 360;
 
 // 三角面片的顶点
 // 六维数组
@@ -245,6 +261,16 @@ using Layer = std::vector<MyVertex>;
 std::vector<Layer> bezierVertices;
 
 std::vector<float> bezierVerticesData;
+
+void addVertexData(std::vector<float>& data, const MyVertex& vertex) {
+    data.push_back(vertex.position.x);
+    data.push_back(vertex.position.y);
+    data.push_back(vertex.position.z);
+    data.push_back(vertex.normal.x);
+    data.push_back(vertex.normal.y);
+    data.push_back(vertex.normal.z);
+}
+
 
 void initData() {
     std::copy(vertices + 180, vertices + 216, CeilingVertices);
@@ -281,13 +307,15 @@ void initData() {
 		// 矩形和椭圆之间，椭圆和圆形之间
         if (i < bezierSampleNum / 2) {
             float ratio = (float)i / (bezierSampleNum / 2);
+			glm::vec3 bezierPoint = bezierCurve.getPoint(i);
 
             for (int j = 0; j < shapeSampleNum; j++) {
                 glm::vec3 p1 = rectSamplePoints[j];
                 glm::vec3 p2 = ellipseSamplePoints[j];
+
                 glm::vec3 p = p1 + ratio * (p2 - p1);
 
-                glm::vec3 vertexPos = bezierCurve.getPoint(i) + p;
+				glm::vec3 vertexPos = bezierPoint + p;
 
 				MyVertex vertex(vertexPos, glm::vec3(0.0f, 0.0f, 0.0f));
                 bezierVertices[i].push_back(vertex);
@@ -329,6 +357,10 @@ void initData() {
 			glm::vec3 normal1 = glm::normalize(glm::cross(v2 - v1, v3 - v1));
 			glm::vec3 normal2 = glm::normalize(glm::cross(v3 - v1, v4 - v1));
 
+            // !方向问题
+			normal1 = -normal1;
+			normal2 = -normal2;
+
 			// vertex的后三个元素存储法向量
 			vertex1.normal += normal1;
 			vertex2.normal += normal1;
@@ -347,20 +379,35 @@ void initData() {
 		}
 	}
 
+	//// 测试！所有法向量方向为(0, 1, 0)
+	//for (int i = 0; i < bezierSampleNum; i++) {
+	//	for (int j = 0; j < shapeSampleNum; j++) {
+	//		bezierVertices[i][j].normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	//	}
+	//}
+
 	bezierVerticesData.clear();
 
-	// 将顶点数据存储到数组中
-	for (int i = 0; i < bezierSampleNum; i++) {
-		for (int j = 0; j < shapeSampleNum; j++) {
-			MyVertex& vertex = bezierVertices[i][j];
-			bezierVerticesData.push_back(vertex.position.x);
-			bezierVerticesData.push_back(vertex.position.y);
-			bezierVerticesData.push_back(vertex.position.z);
-			bezierVerticesData.push_back(vertex.normal.x);
-			bezierVerticesData.push_back(vertex.normal.y);
-			bezierVerticesData.push_back(vertex.normal.z);
-		}
-	}
+    for (int i = 0; i < bezierSampleNum; i++) {
+        for (int j = 0; j < shapeSampleNum; j++) {
+            MyVertex& vertex1 = bezierVertices[i][j];
+            MyVertex& vertex2 = bezierVertices[(i + 1) % bezierSampleNum][j];
+            MyVertex& vertex3 = bezierVertices[(i + 1) % bezierSampleNum][(j + 1) % shapeSampleNum];
+            MyVertex& vertex4 = bezierVertices[i][(j + 1) % shapeSampleNum];
+
+            // 三角形1: v1, v2, v3
+            // 三角形2: v1, v3, v4
+
+            // 存两个三角形，6个顶点
+			addVertexData(bezierVerticesData, vertex1);
+			addVertexData(bezierVerticesData, vertex2);
+			addVertexData(bezierVerticesData, vertex3);
+
+			addVertexData(bezierVerticesData, vertex1);
+			addVertexData(bezierVerticesData, vertex3);
+			addVertexData(bezierVerticesData, vertex4);
+        }
+    }
 
 	// 释放内存
 	bezierVertices.clear();
