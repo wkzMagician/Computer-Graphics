@@ -37,9 +37,9 @@ float lastY = SCR_HEIGHT / 2.0f;
 //glm::vec3 lightColor(0.02f, 0.02f, 0.02f);
 glm::vec3 lightColor(0.04f, 0.04f, 0.04f);
 
-glm::vec3 lightAmbient = 0.2f * lightColor;
-glm::vec3 lightDiffuse = 0.8f * lightColor;
-glm::vec3 lightSpecular = 1.0f * lightColor;
+//glm::vec3 lightAmbient = 0.2f * lightColor;
+//glm::vec3 lightDiffuse = 0.8f * lightColor;
+//glm::vec3 lightSpecular = 1.0f * lightColor;
 
 //Light light(lightAmbient, lightDiffuse, lightSpecular);
 

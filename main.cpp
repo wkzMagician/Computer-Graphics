@@ -5,6 +5,11 @@
 #include <iostream>
 
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -16,6 +21,8 @@ bool firstMouse = true;
 // 时间设置
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+bool isShowMenu = false;
 
 int main()
 {
@@ -119,6 +126,13 @@ int main()
     glBufferData(GL_SHADER_STORAGE_BUFFER, samplePoints.size() * sizeof(glm::vec3), samplePoints.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo); // 将 SSBO 绑定到绑定点 0
 
+    // IMGUI
+	const char* glsl_version = "#version 330";
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
 
     // 渲染循环
     // -----------
@@ -134,6 +148,34 @@ int main()
         // -----
         processInput(window);
 
+        // imgui
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+        ImGui::SetNextWindowSize(ImVec2(600, 300)); // 设置窗口大小为400x300
+		ImGui::Begin("Control Panel(Press ESC to switch between Menu and Scene)");
+
+        if (ImGui::Button("Exit", ImVec2(100, 50))) // 设置按钮大小为100x50
+        {
+            glfwSetWindowShouldClose(window, true);
+        }
+
+        // 输入框
+        //glm::vec3 Color(0.8f, 0.6f, 0.2f);
+        //float Metallic = 0.8f;
+        //float Roughness = 0.3f;
+        //float AmbientOcclusion = 1.0f;
+
+		ImGui::Text("Pipe Material");
+		ImGui::SliderFloat("pipeAmbientOcclusion", &pipeAmbientOcclusion, 0.0f, 1.0f);
+		ImGui::SliderFloat("pipeMetallic", &pipeMetallic, 0.0f, 1.0f);
+		ImGui::SliderFloat("pipeRoughness", &pipeRoughness, 0.0f, 1.0f);
+		ImGui::ColorEdit3("pipeColor", (float*)&pipeColor);
+        ImGui::End();
+
+		pipeMesh.setMaterial(pipeColor, pipeMetallic, pipeRoughness, pipeAmbientOcclusion);
+
         // 开始渲染
         // ------
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -147,6 +189,9 @@ int main()
 		pipeModelWrap.draw(camera);
 		bezierModelWrap.draw(camera);
 		//normalModelWrap.draw(camera);
+
+        ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
    
         // glfw：交换缓冲区和轮询 IO 事件（按下/释放键、移动鼠标等）
         // -------------------------------------------------------------------------------
@@ -158,15 +203,37 @@ int main()
     // glfw：终止，清除所有以前分配的 GLFW 资源。
     // ------------------------------------------------------------------
     glfwTerminate();
+
+	// 释放资源
+	// ------------------------------------------------------------------
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
     return 0;
 }
 
 //查询 GLFW 是否按下/释放了该帧的相关键并做出相应的反应
 // ---------------------------------------------------------------------------------------------------------
+bool isEcsPressed = false;
 void processInput(GLFWwindow* window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		if (!isEcsPressed) {
+            isEcsPressed = true;
+            isShowMenu = !isShowMenu;
+        }
+        if (isShowMenu) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); // 显示鼠标光标
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // 隐藏鼠标光标
+        }
+    }else{
+		if (isEcsPressed) isEcsPressed = false;
+	}
+
+	if (isShowMenu) return;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -191,6 +258,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+	if (isShowMenu) return;
+
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
     if (firstMouse)
@@ -213,6 +282,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+	if (isShowMenu) return;
+
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 

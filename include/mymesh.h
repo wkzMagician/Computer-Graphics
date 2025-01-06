@@ -271,6 +271,21 @@ public:
 		this->drawLine = drawLine;
 		this->drawLineLoop = drawLineLoop;
 	}
+
+	void setMaterial(MyMaterial material) {
+		this->material = material;
+	}
+
+	void setMaterial(Material_BRDF material) {
+		this->materialBRDF = material;
+	}
+
+	void setMaterial(glm::vec3 color, float metallic, float roughness, float ambientOcclusion) {
+		this->materialBRDF.albedo = color;
+		this->materialBRDF.metallic = metallic;
+		this->materialBRDF.roughness = roughness;
+		this->materialBRDF.ao = ambientOcclusion;
+	}
 };
 
 #endif // !MYMESH_H
