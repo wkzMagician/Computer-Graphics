@@ -42,4 +42,19 @@ public:
 	glm::vec3 getPoint(int i) {
 		return curvePoints[i];
 	}
+
+	// 起始点
+	glm::vec3 getStartPoint() {
+		return controlPoints[0];
+	}
+
+	// 终止点
+	glm::vec3 getEndPoint() {
+		return controlPoints[controlPoints.size() - 1];
+	}
+
+	// 中点
+	glm::vec3 getMidPoint() {
+		return deCasteljau(0.5f);
+	}
 };

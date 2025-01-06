@@ -31,12 +31,15 @@ public:
 
 	std::vector<glm::vec3> samples;
 
-	// 采样
-	virtual std::vector<glm::vec3> getSamplePoints(int numSamples = 100) {
+	virtual void setSamplePoints(int numSamples = 100) {
 		this->numSamples = numSamples;
 		samples.clear();
 		calRawSamplePoints();
 		transformSamplePoints();
+	}
+
+	// 采样
+	std::vector<glm::vec3> getSamplePoints() {
 		return samples;
 	}
 

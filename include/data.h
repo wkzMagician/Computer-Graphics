@@ -213,9 +213,9 @@ Geometry bezierGeometry(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)
 
 // 贝塞尔曲线
 // 矩形 - 椭圆 - 圆形
-glm::vec2 rectSize(0.4f, 0.4f);
-glm::vec2 ellipseRadius(0.2f, 0.1f);
-float circleRadius = 0.1f;
+glm::vec2 rectSize(0.2f, 0.2f);
+glm::vec2 ellipseRadius(0.1f, 0.05f);
+float circleRadius = 0.05f;
 
 Rectangle rectangle(glm::vec3(1.0f, 0.0f, 0.0f), rectSize);
 Ellipse ellipse(glm::vec3(1.0f, 0.0f, 0.0f), ellipseRadius);
@@ -229,23 +229,23 @@ std::vector<glm::vec3> ellipseSamplePoints;
 std::vector<glm::vec3> circleSamplePoints;
 
 // 控制顶点的坐标
-std::vector<glm::vec3> controlPoints = {
-	glm::vec3(-roomWidth / 2, roomHeight / 4, -roomDepth / 2),
-	glm::vec3(-roomWidth / 4, -roomHeight / 8, -roomDepth / 4),
-	glm::vec3(roomWidth / 4, roomHeight / 8, roomDepth / 4),
-	glm::vec3(roomWidth / 2, -roomHeight / 4, roomDepth / 2)
-};
-
 //std::vector<glm::vec3> controlPoints = {
-//    glm::vec3(-roomWidth / 2, 0.0f, -roomDepth / 2),
-//    glm::vec3(-roomWidth / 4, 0.0f, -roomDepth / 4),
-//    glm::vec3(roomWidth / 4, 0.0f, roomDepth / 4),
-//    glm::vec3(roomWidth / 2, 0.0f, roomDepth / 2)
+//	glm::vec3(-roomWidth / 2, roomHeight / 4, -roomDepth / 2),
+//	glm::vec3(-roomWidth / 4, -roomHeight / 8, -roomDepth / 4),
+//	glm::vec3(roomWidth / 4, roomHeight / 8, roomDepth / 4),
+//	glm::vec3(roomWidth / 2, -roomHeight / 4, roomDepth / 2)
 //};
+
+std::vector<glm::vec3> controlPoints = {
+    glm::vec3(-roomWidth / 2, -roomHeight / 4, 0.0f),
+    glm::vec3(-roomWidth / 4, 0.0f, 0.0f),
+    glm::vec3(roomWidth / 4, 0.0f, 0.0f),
+    glm::vec3(roomWidth / 2, -roomHeight / 4, 0.0f)
+};
 
 // 贝塞尔曲线
 BezierCurve bezierCurve(controlPoints);
-int bezierSampleNum = 360;
+int bezierSampleNum = 120;
 
 // 三角面片的顶点
 // 六维数组
@@ -258,8 +258,20 @@ public:
 	MyVertex(glm::vec3 pos, glm::vec3 nor) : position(pos), normal(nor) {}
 };
 using Layer = std::vector<MyVertex>;
-std::vector<Layer> bezierVertices;
+std::vector<Layer> pipeVertices;
 
+std::vector<float> pipeVerticesData;
+
+// 关键位置截面线
+glm::vec3 rectPos;
+glm::vec3 ellipsePos;
+glm::vec3 circlePos;
+// 顶点
+std::vector<float> rectVertices;
+std::vector<float> ellipseVertices;
+std::vector<float> circleVertices;
+
+// 贝塞尔曲线的顶点
 std::vector<float> bezierVerticesData;
 
 void addVertexData(std::vector<float>& data, const MyVertex& vertex) {
@@ -291,22 +303,25 @@ void initData() {
 	}
 
 	// 初始化采样点
-	rectSamplePoints = rectangle.getSamplePoints(shapeSampleNum);
-	ellipseSamplePoints = ellipse.getSamplePoints(shapeSampleNum);
-	circleSamplePoints = circle.getSamplePoints(shapeSampleNum);
+	rectangle.setSamplePoints(shapeSampleNum);
+	ellipse.setSamplePoints(shapeSampleNum);
+	circle.setSamplePoints(shapeSampleNum);
+	rectSamplePoints = rectangle.getSamplePoints();
+	ellipseSamplePoints = ellipse.getSamplePoints();
+	circleSamplePoints = circle.getSamplePoints();
 
 	// 计算贝塞尔曲线上的点
 	bezierCurve.calCurvePoints(bezierSampleNum);
 
-	bezierVertices.clear();
+	pipeVertices.clear();
 
     // 插值采样，组装三角面片
-	for (int i = 0; i < bezierSampleNum; i++) {
-		bezierVertices.push_back(Layer());
+	for (int i = 0; i <= bezierSampleNum; i++) {
+		pipeVertices.push_back(Layer());
 
 		// 矩形和椭圆之间，椭圆和圆形之间
         if (i < bezierSampleNum / 2) {
-            float ratio = (float)i / (bezierSampleNum / 2);
+            float ratio = (float)i / (bezierSampleNum / 2.0f);
 			glm::vec3 bezierPoint = bezierCurve.getPoint(i);
 
             for (int j = 0; j < shapeSampleNum; j++) {
@@ -318,11 +333,11 @@ void initData() {
 				glm::vec3 vertexPos = bezierPoint + p;
 
 				MyVertex vertex(vertexPos, glm::vec3(0.0f, 0.0f, 0.0f));
-                bezierVertices[i].push_back(vertex);
+                pipeVertices[i].push_back(vertex);
             }
         }
         else {
-            float ratio = (float)(i - bezierSampleNum / 2) / (bezierSampleNum / 2);
+            float ratio = (float)(i - bezierSampleNum / 2) / (bezierSampleNum / 2.0f);
 
             for (int j = 0; j < shapeSampleNum; j++) {
                 glm::vec3 p1 = ellipseSamplePoints[j];
@@ -332,7 +347,7 @@ void initData() {
                 glm::vec3 vertexPos = bezierCurve.getPoint(i) + p;
 
                 MyVertex vertex(vertexPos, glm::vec3(0.0f, 0.0f, 0.0f));
-                bezierVertices[i].push_back(vertex);
+                pipeVertices[i].push_back(vertex);
             }
         }
 	}
@@ -340,10 +355,10 @@ void initData() {
 	// 顶面
 	for (int i = 0; i < bezierSampleNum; i++) {
 		for (int j = 0; j < shapeSampleNum; j++) {
-			MyVertex& vertex1 = bezierVertices[i][j];
-			MyVertex& vertex2 = bezierVertices[(i + 1) % bezierSampleNum][j];
-			MyVertex& vertex3 = bezierVertices[(i + 1) % bezierSampleNum][(j + 1) % shapeSampleNum];
-			MyVertex& vertex4 = bezierVertices[i][(j + 1) % shapeSampleNum];
+			MyVertex& vertex1 = pipeVertices[i][j];
+			MyVertex& vertex2 = pipeVertices[i + 1][j];
+			MyVertex& vertex3 = pipeVertices[i + 1][(j + 1) % shapeSampleNum];
+			MyVertex& vertex4 = pipeVertices[i][(j + 1) % shapeSampleNum];
 
 			// 三角形1: v1, v2, v3
 			// 三角形2: v1, v3, v4
@@ -375,7 +390,7 @@ void initData() {
     // 归一化法向量
 	for (int i = 0; i < bezierSampleNum; i++) {
 		for (int j = 0; j < shapeSampleNum; j++) {
-			bezierVertices[i][j].normal = glm::normalize(bezierVertices[i][j].normal);
+            pipeVertices[i][j].normal = glm::normalize(pipeVertices[i][j].normal);
 		}
 	}
 
@@ -390,27 +405,70 @@ void initData() {
 
     for (int i = 0; i < bezierSampleNum; i++) {
         for (int j = 0; j < shapeSampleNum; j++) {
-            MyVertex& vertex1 = bezierVertices[i][j];
-            MyVertex& vertex2 = bezierVertices[(i + 1) % bezierSampleNum][j];
-            MyVertex& vertex3 = bezierVertices[(i + 1) % bezierSampleNum][(j + 1) % shapeSampleNum];
-            MyVertex& vertex4 = bezierVertices[i][(j + 1) % shapeSampleNum];
+            MyVertex& vertex1 = pipeVertices[i][j];
+            MyVertex& vertex2 = pipeVertices[i + 1][j];
+            MyVertex& vertex3 = pipeVertices[i + 1][(j + 1) % shapeSampleNum];
+            MyVertex& vertex4 = pipeVertices[i][(j + 1) % shapeSampleNum];
 
             // 三角形1: v1, v2, v3
             // 三角形2: v1, v3, v4
 
             // 存两个三角形，6个顶点
-			addVertexData(bezierVerticesData, vertex1);
-			addVertexData(bezierVerticesData, vertex2);
-			addVertexData(bezierVerticesData, vertex3);
+			addVertexData(pipeVerticesData, vertex1);
+			addVertexData(pipeVerticesData, vertex2);
+			addVertexData(pipeVerticesData, vertex3);
 
-			addVertexData(bezierVerticesData, vertex1);
-			addVertexData(bezierVerticesData, vertex3);
-			addVertexData(bezierVerticesData, vertex4);
+			addVertexData(pipeVerticesData, vertex1);
+			addVertexData(pipeVerticesData, vertex3);
+			addVertexData(pipeVerticesData, vertex4);
         }
     }
 
 	// 释放内存
-	bezierVertices.clear();
+    pipeVertices.clear();
+
+    // 关键位置截面线
+	rectPos = bezierCurve.getStartPoint();
+	ellipsePos = bezierCurve.getMidPoint();
+	circlePos = bezierCurve.getEndPoint();
+
+	float amp = 1.001f;
+
+	for (auto& p : rectSamplePoints) {
+		rectVertices.push_back(p.x * amp + rectPos.x);
+		rectVertices.push_back(p.y * amp + rectPos.y);
+		rectVertices.push_back(p.z * amp + rectPos.z);
+		rectVertices.push_back(0.0f);
+		rectVertices.push_back(0.0f);
+		rectVertices.push_back(1.0f);
+	}
+	for (auto& p : ellipseSamplePoints) {
+		ellipseVertices.push_back(p.x * amp + ellipsePos.x);
+		ellipseVertices.push_back(p.y * amp + ellipsePos.y);
+		ellipseVertices.push_back(p.z * amp + ellipsePos.z);
+		ellipseVertices.push_back(0.0f);
+		ellipseVertices.push_back(0.0f);
+		ellipseVertices.push_back(1.0f);
+	}
+	for (auto& p : circleSamplePoints) {
+		circleVertices.push_back(p.x * amp + circlePos.x);
+		circleVertices.push_back(p.y * amp + circlePos.y);
+		circleVertices.push_back(p.z * amp + circlePos.z);
+		circleVertices.push_back(0.0f);
+		circleVertices.push_back(0.0f);
+		circleVertices.push_back(1.0f);
+	}
+
+	// 贝塞尔曲线的顶点
+    auto& points = bezierCurve.curvePoints;
+	for (auto& p : points) {
+		bezierVerticesData.push_back(p.x);
+		bezierVerticesData.push_back(p.y);
+		bezierVerticesData.push_back(p.z);
+		bezierVerticesData.push_back(0.0f);
+		bezierVerticesData.push_back(0.0f);
+		bezierVerticesData.push_back(1.0f);
+	}
 }
 
 // constant, linear, and quadratic coefficients

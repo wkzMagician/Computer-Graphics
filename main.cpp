@@ -65,6 +65,7 @@ int main()
     // 编译shader操作
     Shader lightingShader("resources/shader/arealighting.vs", "resources/shader/arealighting.fs");
     Shader lightCubeShader("resources/shader/lightcube.vs", "resources/shader/lightcube.fs");
+	Shader curveShader("resources/shader/curve.vs", "resources/shader/curve.fs");
     // 可视化法线Shader
 	Shader normalShader("resources/shader/normal.vs", "resources/shader/normal.fs", "resources/shader/normal.gs");
 
@@ -83,19 +84,33 @@ int main()
 	MyMesh lightCube(areaLightVertices, areaLightVerticesSize, lightCubeColor);
 
     // 管道模型
+	MyMesh pipeMesh(pipeVerticesData, pipeMaterial);
+
+    // 关键线
+    MyMesh rectMesh(rectVertices, pipeMaterial);
+	MyMesh ellipseMesh(ellipseVertices, pipeMaterial);
+	MyMesh circleMesh(circleVertices, pipeMaterial);
+    rectMesh.setDrawLine(true, true);
+	ellipseMesh.setDrawLine(true, true);
+	circleMesh.setDrawLine(true, true);
+
 	MyMesh bezierMesh(bezierVerticesData, pipeMaterial);
+	bezierMesh.setDrawLine(true, false);
 
 	std::vector<MyMesh*> room = { &FWall, &LWall, &RWall, &Ceiling, &Floor};
 
 	MyModel roomModel(room);
 	MyModel lightCubeModel({ &lightCube });
-	MyModel bezierModel({ &bezierMesh });
+	MyModel pipeModel({ &pipeMesh });
+	MyModel bezierModel({ &bezierMesh, &rectMesh, &ellipseMesh, &circleMesh });
 
 	MyModelWrap roomModelWrap(&roomModel, &lightingShader, roomGeometry);
     MyModelWrap lightCubeModelWrap(&lightCubeModel, &lightCubeShader, areaLightGeometry);
-	MyModelWrap bezierModelWrap(&bezierModel, &lightingShader, bezierGeometry);
+	MyModelWrap pipeModelWrap(&pipeModel, &lightingShader, bezierGeometry);
+	
+    MyModelWrap bezierModelWrap(&bezierModel, &curveShader, bezierGeometry);
 
-	MyModelWrap normalModelWrap(&bezierModel, &normalShader, bezierGeometry);
+	MyModelWrap normalModelWrap(&pipeModel, &normalShader, bezierGeometry);
 
 	// 面光源
 	GLuint ssbo; // 绑定 Shader 存储缓冲对象
@@ -129,6 +144,7 @@ int main()
         
 		roomModelWrap.draw(camera);
 		lightCubeModelWrap.draw(camera);
+		pipeModelWrap.draw(camera);
 		bezierModelWrap.draw(camera);
 		//normalModelWrap.draw(camera);
    

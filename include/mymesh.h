@@ -37,6 +37,8 @@ class MyMesh
 	const glm::vec3 lineColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	bool drawEdge = false;
+	bool drawLine = false;
+	bool drawLineLoop = false;
 
 public:
 	void setDrawEdge(bool drawEdge) {
@@ -245,7 +247,14 @@ public:
 
 		// 渲染
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, verticesSize / vertexAttrSize);
+
+		if (drawLine) {
+			if (drawLineLoop) glDrawArrays(GL_LINE_LOOP, 0, verticesSize / vertexAttrSize);
+			else glDrawArrays(GL_LINE_STRIP, 0, verticesSize / vertexAttrSize);
+		}
+		else {
+			glDrawArrays(GL_TRIANGLES, 0, verticesSize / vertexAttrSize);
+		}
 
 		// 解绑VAO
 		glBindVertexArray(0);
@@ -256,6 +265,11 @@ public:
 
 	void setColor(glm::vec3 color) {
 		this->color = color;
+	}
+
+	void setDrawLine(bool drawLine, bool drawLineLoop) {
+		this->drawLine = drawLine;
+		this->drawLineLoop = drawLineLoop;
 	}
 };
 
