@@ -189,6 +189,64 @@ float areaLightVertices[] = {
      -areaLightWidth,  areaLightHeight, -areaLightDepth,  0.0f,  1.0f,  0.0f
 };
 
+// 立方体贴图
+std::vector<std::string> faces
+{
+    "resources/textures/skybox/right.jpg",
+    "resources/textures/skybox/left.jpg",
+    "resources/textures/skybox/top.jpg",
+    "resources/textures/skybox/bottom.jpg",
+    "resources/textures/skybox/front.jpg",
+    "resources/textures/skybox/back.jpg"
+};
+
+const float boxSize = 100.0f;
+
+float skyboxVertices[] = {
+    // positions          
+    -boxSize,  boxSize, -boxSize,
+    -boxSize, -boxSize, -boxSize,
+     boxSize, -boxSize, -boxSize,
+     boxSize, -boxSize, -boxSize,
+     boxSize,  boxSize, -boxSize,
+    -boxSize,  boxSize, -boxSize,
+
+    -boxSize, -boxSize,  boxSize,
+    -boxSize, -boxSize, -boxSize,
+    -boxSize,  boxSize, -boxSize,
+    -boxSize,  boxSize, -boxSize,
+    -boxSize,  boxSize,  boxSize,
+    -boxSize, -boxSize,  boxSize,
+
+     boxSize, -boxSize, -boxSize,
+     boxSize, -boxSize,  boxSize,
+     boxSize,  boxSize,  boxSize,
+     boxSize,  boxSize,  boxSize,
+     boxSize,  boxSize, -boxSize,
+     boxSize, -boxSize, -boxSize,
+
+    -boxSize, -boxSize,  boxSize,
+    -boxSize,  boxSize,  boxSize,
+     boxSize,  boxSize,  boxSize,
+     boxSize,  boxSize,  boxSize,
+     boxSize, -boxSize,  boxSize,
+    -boxSize, -boxSize,  boxSize,
+
+    -boxSize,  boxSize, -boxSize,
+     boxSize,  boxSize, -boxSize,
+     boxSize,  boxSize,  boxSize,
+     boxSize,  boxSize,  boxSize,
+    -boxSize,  boxSize,  boxSize,
+    -boxSize,  boxSize, -boxSize,
+
+    -boxSize, -boxSize, -boxSize,
+    -boxSize, -boxSize,  boxSize,
+     boxSize, -boxSize, -boxSize,
+     boxSize, -boxSize, -boxSize,
+    -boxSize, -boxSize,  boxSize,
+     boxSize, -boxSize,  boxSize
+};
+
 
 //获取各个平面的数据
 // ------------------------------------------------------------------
@@ -199,6 +257,7 @@ const unsigned int RWallVerticesSize = 36;
 const unsigned int FWallVerticesSize = 36;
 const unsigned int lightCubeVerticesSize = 216;
 const unsigned int areaLightVerticesSize = 216;
+const unsigned int skyboxVerticesSize = 108;
 
 float CeilingVertices[CeilingVerticesSize];
 float FloorVertices[FloorVerticesSize];

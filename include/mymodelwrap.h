@@ -16,6 +16,13 @@ public:
 		this->model = model;
 	}
 
+	MyModelWrap(MyModel* model, Shader* shader) {
+		Geometry g;
+		this->geometry = g;
+		this->shader = shader;
+		this->model = model;
+	}
+
 	~MyModelWrap() {
 		
 	}

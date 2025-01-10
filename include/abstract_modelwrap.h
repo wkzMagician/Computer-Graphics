@@ -20,8 +20,6 @@ public:
 		this->shader = shader;
 		this->geometry = geometry;
 		this->initGeometry = geometry;
-		this->isLight = false;
-		this->mixRatio = 0.0f;
 	}
 
 	AbstractModelWrap() {

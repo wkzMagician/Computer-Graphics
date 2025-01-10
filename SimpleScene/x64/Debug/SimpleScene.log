@@ -8,7 +8,7 @@ D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\include\data.h(15,3
 D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\include\data.h(16,37): warning C4244: “初始化”: 从“double”转换到“unsigned int”，可能丢失数据
   (编译源文件“main.cpp”)
   
-D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\include\mymesh.h(82,31): warning C4267: “=”: 从“size_t”转换到“unsigned int”，可能丢失数据
+D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\include\mymesh.h(95,31): warning C4267: “=”: 从“size_t”转换到“unsigned int”，可能丢失数据
   (编译源文件“main.cpp”)
   
   SimpleScene.vcxproj -> D:\Visual Studio Projects\OpenGL\SJTU_SE_CG-main\SimpleScene\x64\Debug\SimpleScene.exe

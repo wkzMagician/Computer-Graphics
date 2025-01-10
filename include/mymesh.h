@@ -8,6 +8,15 @@
 
 class MyMesh 
 {
+public:
+	// 材质类型
+	// 比如说，CUBE_MAP, 2D_TEXTURE
+	enum TextureType {
+		CUBE_MAP,
+		TEXTURE_2D
+	};
+
+private:
 	// 顶点数组
 	float* vertices;
 	// VAO
@@ -33,6 +42,10 @@ class MyMesh
 
 	bool useTexture = false;
 
+	TextureType textureType;
+	// textureID
+	unsigned int textureID;
+	
 	const float LINE_WIDTH = 7.0f;
 	const glm::vec3 lineColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -51,7 +64,7 @@ public:
 	unsigned int vertexAttrSize = 6;
 
 
-	MyMesh(float* vertices, unsigned int N, glm::vec3 color) {
+	MyMesh(float* vertices, unsigned int N, glm::vec3 color, int vertexAttrSize = 6) {
 		verticesSize = N;
 		this->vertices = new float[N];
 		memcpy(this->vertices, vertices, N * sizeof(float));
@@ -60,7 +73,7 @@ public:
 		setupMesh();
     }
 
-	MyMesh(float* vertices, unsigned int N, MyMaterial material) {
+	MyMesh(float* vertices, unsigned int N, MyMaterial material, int vertexAttrSize = 6) {
 		verticesSize = N;
 		this->vertices = new float[N];
 		memcpy(this->vertices, vertices, N * sizeof(float));
@@ -69,7 +82,7 @@ public:
 		setupMesh();
 	}
 
-	MyMesh(float* vertices, unsigned int N, Material_BRDF material) {
+	MyMesh(float* vertices, unsigned int N, Material_BRDF material, int vertexAttrSize = 6) {
 		verticesSize = N;
 		this->vertices = new float[N];
 		memcpy(this->vertices, vertices, N * sizeof(float));
@@ -78,7 +91,7 @@ public:
 		setupMesh();
 	}
 
-	MyMesh(std::vector<float> vertices, Material_BRDF material) {
+	MyMesh(std::vector<float> vertices, Material_BRDF material, int vertexAttrSize = 6) {
 		verticesSize = vertices.size();
 		this->vertices = new float[verticesSize];
 		memcpy(this->vertices, vertices.data(), verticesSize * sizeof(float));
@@ -87,15 +100,16 @@ public:
 		setupMesh();
 	}
 
-	MyMesh(float* vertices, unsigned int N, glm::vec3 color, vector<string> texturePaths, bool useTexture) {
+	MyMesh(float* vertices, unsigned int N, vector<string> texturePaths, TextureType textureType, int vertexAttrSize = 3) {
 		verticesSize = N;
 		this->vertices = new float[N];
 		memcpy(this->vertices, vertices, N * sizeof(float));
 		this->color = color;
 		this->texturePaths = texturePaths;
-		this->useTexture = useTexture;
+		this->useTexture = true;
+		this->textureType = textureType;
 
-		vertexAttrSize = 8;
+		this->vertexAttrSize = vertexAttrSize;
 
 		setupMesh();
 	}
@@ -114,52 +128,35 @@ public:
 		}
 	}
 
-	bool loadTexture(const char* path, string typeName) {
+	bool loadCubemap() {
+
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
 		int width, height, nrChannels;
-		unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
-
-		if (data) {
-			unsigned int texture;
-			glGenTextures(1, &texture);
-			glBindTexture(GL_TEXTURE_2D, texture);
-
-			// 设置纹理环绕方式
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			// 设置纹理过滤方式
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			if (nrChannels == 3) {
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		for (unsigned int i = 0; i < texturePaths.size(); i++)
+		{
+			unsigned char* data = stbi_load(texturePaths[i].c_str(), &width, &height, &nrChannels, 0);
+			if (data)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+					0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+				);
+				stbi_image_free(data);
 			}
-			else if (nrChannels == 4) {
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			else
+			{
+				std::cout << "Cubemap texture failed to load at path: " << texturePaths[i] << std::endl;
+				stbi_image_free(data);
 			}
-			else {
-				cout << "Texture format not supported" << endl;
-				return false;
-			}
-
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-			stbi_image_free(data);
-
-			Texture textureObj;
-			textureObj.id = texture;
-			textureObj.type = typeName;
-			textureObj.path = path;
-
-			textures.push_back(textureObj);
-
-			return true;
 		}
-		else {
-			cout << "Failed to load texture" << endl;
-			stbi_image_free(data);
-			return false;
-		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		return true;
 	}
     
     void setupMesh() {
@@ -185,7 +182,16 @@ public:
 
 			return;
 		}
-        
+
+		if (textureType == CUBE_MAP) {
+			// 设置顶点属性指针
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, this->vertexAttrSize * sizeof(float), (void*)(0 * sizeof(float)));
+			glEnableVertexAttribArray(0); // 启动顶点属性
+
+			loadCubemap();
+			return;
+		}
+		
 		// 设置顶点属性指针
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(0 * sizeof(float)));
 		glEnableVertexAttribArray(0); // 启动顶点属性
@@ -194,18 +200,9 @@ public:
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1); // 启动法向量属性
 
-
 		// 设置纹理属性指针
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2); // 启动纹理属性
-
-		// 加载纹理
-		for (unsigned int i = 0; i < texturePaths.size(); i++) {
-			if (!loadTexture(texturePaths[i].c_str(), "gTextureHeight")) {
-				cout << "Failed to load texture" << endl;
-			}
-		}
-
     }
 
 	void draw(Shader* shader) {
@@ -233,17 +230,18 @@ public:
 		shader->setFloat("material.metallic", materialBRDF.metallic);
 		shader->setFloat("material.roughness", materialBRDF.roughness);
 
-		/*if (useTexture) {
-			shader->setBool("useTex", true);
+		if (useTexture) {
+			if (textureType == CUBE_MAP) {
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+			}
+			else {
+				for (unsigned int i = 0; i < textures.size(); i++) {
+					glActiveTexture(GL_TEXTURE0 + i);
+					glBindTexture(GL_TEXTURE_2D, textures[i].id);
+				}
+			}
 		}
-		else {
-			shader->setBool("useTex", false);
-		}*/
-
-		/*shader->setVec4("Ka", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
-		shader->setVec4("Kd", glm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
-		shader->setVec4("Ks", glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-		shader->setFloat("Ns", 32.0f);*/
 
 		// 渲染
 		glBindVertexArray(VAO);

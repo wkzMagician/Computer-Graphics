@@ -76,6 +76,10 @@ int main()
     // 可视化法线Shader
 	Shader normalShader("resources/shader/normal.vs", "resources/shader/normal.fs", "resources/shader/normal.gs");
 
+    // 天空盒
+    Shader skyboxShader("resources/shader/skybox.vs", "resources/shader/skybox.fs");
+	skyboxShader.setInt("skybox", 0);
+
 	/*MyMesh FWall(FWallVertices, FWallVerticesSize, FWallColor);
 	MyMesh LWall(LWallVertices, LWallVerticesSize, LWallColor);
 	MyMesh RWall(RWallVertices, RWallVerticesSize, RWallColor);
@@ -104,20 +108,24 @@ int main()
 	MyMesh bezierMesh(bezierVerticesData, pipeMaterial);
 	bezierMesh.setDrawLine(true, false);
 
+    MyMesh skyboxMesh(skyboxVertices, skyboxVerticesSize, faces, MyMesh::CUBE_MAP, 3);
+
 	std::vector<MyMesh*> room = { &FWall, &LWall, &RWall, &Ceiling, &Floor};
 
 	MyModel roomModel(room);
 	MyModel lightCubeModel({ &lightCube });
 	MyModel pipeModel({ &pipeMesh });
 	MyModel bezierModel({ &bezierMesh, &rectMesh, &ellipseMesh, &circleMesh });
+    MyModel skyboxModel({ &skyboxMesh });
 
 	MyModelWrap roomModelWrap(&roomModel, &lightingShader, roomGeometry);
     MyModelWrap lightCubeModelWrap(&lightCubeModel, &lightCubeShader, areaLightGeometry);
 	MyModelWrap pipeModelWrap(&pipeModel, &lightingShader, bezierGeometry);
 	
     MyModelWrap bezierModelWrap(&bezierModel, &curveShader, bezierGeometry);
-
 	MyModelWrap normalModelWrap(&pipeModel, &normalShader, bezierGeometry);
+    
+    MyModelWrap skyboxModelWrap(&skyboxModel, &skyboxShader);
 
 	// 面光源
 	GLuint ssbo; // 绑定 Shader 存储缓冲对象
@@ -190,6 +198,12 @@ int main()
 		bezierModelWrap.draw(camera);
 		//normalModelWrap.draw(camera);
 
+		// 绘制天空盒
+		glDepthFunc(GL_LEQUAL);  // 更改深度函数，以便深度测试在值等于深度缓冲区最大值时通过
+		skyboxModelWrap.draw(camera);
+		glDepthFunc(GL_LESS); // 恢复正常深度函数
+
+		// 绘制imgui
         ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
    
