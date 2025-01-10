@@ -23,6 +23,8 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 bool isShowMenu = false;
+bool isShowNormal = false;
+bool isShowPipe = true;
 
 int main()
 {
@@ -80,12 +82,6 @@ int main()
     Shader skyboxShader("resources/shader/skybox.vs", "resources/shader/skybox.fs");
 	skyboxShader.setInt("skybox", 0);
 
-	/*MyMesh FWall(FWallVertices, FWallVerticesSize, FWallColor);
-	MyMesh LWall(LWallVertices, LWallVerticesSize, LWallColor);
-	MyMesh RWall(RWallVertices, RWallVerticesSize, RWallColor);
-	MyMesh Ceiling(CeilingVertices, CeilingVerticesSize, CeilingColor);
-	MyMesh Floor(FloorVertices, FloorVerticesSize, FloorColor);*/
-
 	MyMesh FWall(FWallVertices, FWallVerticesSize, FWallMaterial);
 	MyMesh LWall(LWallVertices, LWallVerticesSize, LWallMaterial);
 	MyMesh RWall(RWallVertices, RWallVerticesSize, RWallMaterial);
@@ -142,6 +138,8 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
+    io.Fonts->AddFontFromFileTTF("c:/windows/fonts/simhei.ttf", 13.0f, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+
     // 渲染循环
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -161,25 +159,39 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-        ImGui::SetNextWindowSize(ImVec2(600, 300)); // 设置窗口大小为400x300
-		ImGui::Begin("Control Panel(Press ESC to switch between Menu and Scene)");
+        ImGui::SetNextWindowSize(ImVec2(500, 300)); // 设置窗口大小为400x300
+		ImGui::Begin(u8"控制窗口(按 M to 切换菜单模式和场景模式)");
 
-        if (ImGui::Button("Exit", ImVec2(100, 50))) // 设置按钮大小为100x50
-        {
+        if (ImGui::Button(u8"退出", ImVec2(60, 20))) { // 设置按钮大小为100x50 
             glfwSetWindowShouldClose(window, true);
         }
 
-        // 输入框
-        //glm::vec3 Color(0.8f, 0.6f, 0.2f);
-        //float Metallic = 0.8f;
-        //float Roughness = 0.3f;
-        //float AmbientOcclusion = 1.0f;
+		if (isShowNormal) {
+			if(ImGui::Button(u8"取消显示法线", ImVec2(100, 20))){
+				isShowNormal = false;
+			}
+		} else {
+			if (ImGui::Button(u8"显示法线", ImVec2(100, 20))) {
+				isShowNormal = true;
+			}
+		}
 
-		ImGui::Text("Pipe Material");
-		ImGui::SliderFloat("pipeAmbientOcclusion", &pipeAmbientOcclusion, 0.0f, 1.0f);
-		ImGui::SliderFloat("pipeMetallic", &pipeMetallic, 0.0f, 1.0f);
-		ImGui::SliderFloat("pipeRoughness", &pipeRoughness, 0.0f, 1.0f);
-		ImGui::ColorEdit3("pipeColor", (float*)&pipeColor);
+		if (isShowPipe) {
+			if (ImGui::Button(u8"取消显示管道", ImVec2(100, 20))) {
+				isShowPipe = false;
+			}
+		} else {
+			if (ImGui::Button(u8"显示管道", ImVec2(100, 20))) {
+				isShowPipe = true;
+			}   
+		}
+
+        // 输入框
+		ImGui::Text(u8"管道材质");
+		ImGui::SliderFloat(u8"管道：环境光遮蔽", &pipeAmbientOcclusion, 0.0f, 1.0f);
+		ImGui::SliderFloat(u8"管道：金属度", &pipeMetallic, 0.0f, 1.0f);
+		ImGui::SliderFloat(u8"管道：粗糙度", &pipeRoughness, 0.0f, 1.0f);
+		ImGui::ColorEdit3(u8"管道：颜色", (float*)&pipeColor);
         ImGui::End();
 
 		pipeMesh.setMaterial(pipeColor, pipeMetallic, pipeRoughness, pipeAmbientOcclusion);
@@ -194,9 +206,9 @@ int main()
         
 		roomModelWrap.draw(camera);
 		lightCubeModelWrap.draw(camera);
-		pipeModelWrap.draw(camera);
+		if(isShowPipe) pipeModelWrap.draw(camera);
 		bezierModelWrap.draw(camera);
-		//normalModelWrap.draw(camera);
+        if (isShowNormal) normalModelWrap.draw(camera);
 
 		// 绘制天空盒
 		glDepthFunc(GL_LEQUAL);  // 更改深度函数，以便深度测试在值等于深度缓冲区最大值时通过
@@ -229,12 +241,15 @@ int main()
 
 //查询 GLFW 是否按下/释放了该帧的相关键并做出相应的反应
 // ---------------------------------------------------------------------------------------------------------
-bool isEcsPressed = false;
+bool is_M_Pressed = false;
 void processInput(GLFWwindow* window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		if (!isEcsPressed) {
-            isEcsPressed = true;
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) // 退出
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+		if (!is_M_Pressed) {
+            is_M_Pressed = true;
             isShowMenu = !isShowMenu;
         }
         if (isShowMenu) {
@@ -244,7 +259,7 @@ void processInput(GLFWwindow* window)
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // 隐藏鼠标光标
         }
     }else{
-		if (isEcsPressed) isEcsPressed = false;
+		if (is_M_Pressed) is_M_Pressed = false;
 	}
 
 	if (isShowMenu) return;

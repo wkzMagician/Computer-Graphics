@@ -218,7 +218,7 @@ public:
 
 		shader->setVec3("objectColor", color);
 
-		// ！！！设置材质
+		// 设置材质
 		/*shader->setVec3("material.ambient", material.ambient);
 		shader->setVec3("material.diffuse", material.diffuse);
 		shader->setVec3("material.specular", material.specular);
